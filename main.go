@@ -45,10 +45,6 @@ var minURL = `https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=`
 // 实时
 var realURL = `https://web.sqt.gtimg.cn/q=`
 
-var code = ""
-
-var area = ""
-
 func GetFlagAndArgs(flag []string, args []string) (string, string) {
 	for i := 0; i < len(args); i++ {
 		for j := 0; j < len(flag); j++ {
@@ -62,64 +58,80 @@ func GetFlagAndArgs(flag []string, args []string) (string, string) {
 	return "", ""
 }
 
+var stop = make(chan struct{})
+
 func main() {
 
-	_, code = GetFlagAndArgs([]string{"code", "--code", "-c"}, os.Args[1:])
+	var _, code = GetFlagAndArgs([]string{"code", "--code", "-c"}, os.Args[1:])
 	if code == "" {
 		code = "000001"
 	}
 
-	_, area = GetFlagAndArgs([]string{"area", "--area", "-a"}, os.Args[1:])
+	var _, area = GetFlagAndArgs([]string{"area", "--area", "-a"}, os.Args[1:])
 	if area == "" {
 		area = "sh"
 	}
 
-	var index = 0
-
-	getData()
-
-	termWidth, termHeight, err := terminal.GetSize(int(os.Stdin.Fd()))
-	if err != nil {
-		panic(err)
-	}
-
-	go func() {
-		for {
-
-			if index%60 == 0 {
-				getData()
-			}
-
-			graph := asciigraph.Plot(
-				priceData,
-				asciigraph.Width(termWidth-8),
-				asciigraph.Height(termHeight-4),
-				asciigraph.Caption(realData()),
-			)
-
-			fmt.Print("\x1bc")
-
-			fmt.Print("\033[H\033[3J")
-
-			fmt.Print("\r\n")
-
-			fmt.Println(graph)
-
-			index++
-			time.Sleep(time.Second * 3)
-		}
-	}()
+	renderStockByCodeAndArea(area, code)
 
 	select {}
-
 }
 
-// http get method
+var termWidth, termHeight, _ = terminal.GetSize(int(os.Stdin.Fd()))
+
+func tips() {
+	var str = "Q:Quit L:List\r\n"
+	var rstr = strings.Repeat(" ", (termWidth-8-len(str))/2)
+	write(console.FgYellow.Sprint(rstr + str))
+}
+
+func renderStockByCodeAndArea(area, code string) {
+
+	var index = 0
+
+	var fn = func() {
+
+		if index%60 == 0 {
+			getData(area, code)
+		}
+
+		graph := asciigraph.Plot(
+			priceData,
+			asciigraph.Width(termWidth-8),
+			asciigraph.Height(termHeight-3),
+			asciigraph.Caption(realData(area, code)),
+		)
+
+		flush()
+
+		tips()
+
+		write(graph)
+
+		index++
+	}
+
+	fn()
+
+	var timer = time.NewTicker(time.Second * 3)
+
+	go func() {
+
+		for {
+			select {
+			case <-timer.C:
+				fn()
+			case <-stop:
+				return
+			}
+		}
+	}()
+}
 
 var timeData []float64
 var priceData []float64
 
-func getData() {
+func getData(area, code string) {
 
 	timeData = timeData[:0]
 	priceData = priceData[:0]
@@ -150,13 +162,15 @@ func StringToFloat(str string) float64 {
 	return f
 }
 
-func realData() string {
+func realData(area, code string) string {
 
-	var now = time.Now().Format("2006-01-02 15:04:05")
+	var now = time.Now()
 
 	var res = client.Get(realURL + area + code).Query().Send()
 	var bts, _ = GbkToUtf8(res.Bytes())
 	var str = string(bts)
+
+	var sub = time.Now().Sub(now)
 
 	var arr = strings.Split(str, "=")
 	var data = arr[1]
@@ -172,22 +186,34 @@ func realData() string {
 	}
 
 	var title = dataArr[1]
-	var code = dataArr[2]
+	var co = dataArr[2]
 	var currentPrice = dataArr[3]
-	var lowestPrice = dataArr[4]
+	// var startPrice = dataArr[4]
 	var openPrice = dataArr[5]
+	var date = dataArr[30][:8]
+	date = date[:4] + "-" + date[4:6] + "-" + date[6:]
+	var absoluteChange = dataArr[31]
+	var percentChange = dataArr[32]
+	var highestPrice = dataArr[33]
+	var lowestPrice = dataArr[34]
 
-	var percent = (StringToFloat(currentPrice) - StringToFloat(openPrice)) / StringToFloat(openPrice) * 100
+	// var percent = (StringToFloat(currentPrice) - StringToFloat(startPrice)) / StringToFloat(startPrice) * 100
+	var percent = StringToFloat(percentChange)
 
 	var percentStr string
 
 	if percent > 0 {
-		percentStr = console.FgRed.Sprintf("%.2f%%", percent)
+		percentStr = console.FgRed.Sprintf("+%s +%.2f%%", absoluteChange, percent)
 	} else {
-		percentStr = console.FgGreen.Sprintf("%.2f%%", percent)
+		percentStr = console.FgGreen.Sprintf("-%s -%.2f%%", absoluteChange, percent)
 	}
 
-	var ts = fmt.Sprintf("%s %s current: %s ( %s ) lowest: %s open: %s time: %s", title, code, currentPrice, percentStr, lowestPrice, openPrice, now)
+	var ts = fmt.Sprintf(
+		"%s %s %s current: %s ( %s ) lowest: %s hightest: %s open: %s [ %s %.2fms ]",
+		date, title, co, currentPrice, percentStr,
+		lowestPrice, highestPrice, openPrice, now.Format("15:04:05"),
+		float64(sub.Milliseconds())/1000.0*1000,
+	)
 
 	return ts
 }
