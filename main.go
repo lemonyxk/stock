@@ -205,7 +205,7 @@ func realData(area, code string) string {
 	if percent > 0 {
 		percentStr = console.FgRed.Sprintf("+%s +%.2f%%", absoluteChange, percent)
 	} else {
-		percentStr = console.FgGreen.Sprintf("-%s -%.2f%%", absoluteChange, percent)
+		percentStr = console.FgGreen.Sprintf("%s %.2f%%", absoluteChange, percent)
 	}
 
 	var ts = fmt.Sprintf(
