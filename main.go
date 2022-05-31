@@ -40,7 +40,8 @@ func GbkToUtf8(s []byte) ([]byte, error) {
 var minURL = `https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=`
 
 // 日线
-// https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh000001,day,,,320,hfq
+// sh000001,day,,,365,hfq
+var dayURL = `https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=`
 
 // 实时
 var realURL = `https://web.sqt.gtimg.cn/q=`
@@ -58,7 +59,16 @@ func GetFlagAndArgs(flag []string, args []string) (string, string) {
 	return "", ""
 }
 
+const (
+	// 分钟
+	min = "min"
+	// 日线
+	day = "day"
+)
+
 var stop = make(chan struct{})
+
+var mode = min
 
 func main() {
 
@@ -80,19 +90,30 @@ func main() {
 var termWidth, termHeight, _ = terminal.GetSize(int(os.Stdin.Fd()))
 
 func tips() {
-	var str = "Q:Quit L:List\r\n"
-	var rstr = strings.Repeat(" ", (termWidth-8-len(str))/2)
-	write(console.FgYellow.Sprint(rstr + str))
+	var sm = mode
+	if mode == day {
+		sm += " 365"
+	}
+	var str = "[Mode: " + sm + "] [Q:Quit] [L:List] [M:Change to min K] [D: Change to day K] \r\n"
+	var s = strings.Repeat(" ", (termWidth-8-len(str))/2)
+	write(console.FgYellow.Sprint(s + str))
 }
 
 func renderStockByCodeAndArea(area, code string) {
+	if mode == min {
+		minRender(area, code)
+	} else {
+		dayRender(area, code)
+	}
+}
 
+func dayRender(area, code string) {
 	var index = 0
 
 	var fn = func() {
 
 		if index%60 == 0 {
-			getData(area, code)
+			getDayData(area, code)
 		}
 
 		graph := asciigraph.Plot(
@@ -128,10 +149,53 @@ func renderStockByCodeAndArea(area, code string) {
 	}()
 }
 
+func minRender(area, code string) {
+	var index = 0
+
+	var fn = func() {
+
+		if index%60 == 0 {
+			getMinData(area, code)
+		}
+
+		graph := asciigraph.Plot(
+			priceData,
+			asciigraph.Width(termWidth-8),
+			asciigraph.Height(termHeight-3),
+			asciigraph.Caption(realData(area, code)),
+		)
+
+		flush()
+
+		tips()
+
+		write(graph)
+
+		index++
+	}
+
+	fn()
+
+	var timer = time.NewTicker(time.Second * 3)
+
+	go func() {
+
+		for {
+			select {
+			case <-timer.C:
+				fn()
+			case <-stop:
+				return
+			}
+		}
+	}()
+
+}
+
 var timeData []float64
 var priceData []float64
 
-func getData(area, code string) {
+func getMinData(area, code string) {
 
 	timeData = timeData[:0]
 	priceData = priceData[:0]
@@ -150,6 +214,40 @@ func getData(area, code string) {
 		var a = strings.Split(v, " ")
 		timeData = append(timeData, StringToFloat(a[0]))
 		priceData = append(priceData, StringToFloat(a[1]))
+	}
+
+	// the lib is not support the nil value
+	if len(timeData) == 0 || len(priceData) == 0 {
+		timeData = append(timeData, 930)
+		priceData = append(priceData, 0)
+	}
+
+}
+
+func getDayData(area, code string) {
+
+	timeData = timeData[:0]
+	priceData = priceData[:0]
+
+	// var m = make(map[float64]float64)
+
+	var res = client.Get(dayURL + area + code + `,day,,,365,`).Query().Send()
+
+	var arrStr = jsoniter.Get(res.Bytes(), "data", area+code, "day").ToString()
+
+	var arr [][]string
+
+	_ = jsoniter.Unmarshal([]byte(arrStr), &arr)
+
+	for _, dayArr := range arr {
+		timeData = append(timeData, StringToFloat(dayArr[0]))
+		priceData = append(priceData, StringToFloat(dayArr[2]))
+	}
+
+	// the lib is not support the nil value
+	if len(timeData) == 0 || len(priceData) == 0 {
+		timeData = append(timeData, 930)
+		priceData = append(priceData, 0)
 	}
 
 }

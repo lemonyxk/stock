@@ -50,8 +50,11 @@ func init() {
 			default:
 				switch char {
 				case 'l':
-					oldX, oldY = x, y
 					selectMenu()
+				case 'd':
+					changeModeToDay()
+				case 'm':
+					changeModeToMinute()
 				case 'q':
 					exit()
 				default:
@@ -62,6 +65,32 @@ func init() {
 			time.Sleep(time.Millisecond * 50)
 		}
 	}()
+}
+
+func changeModeToDay() {
+	if isSelectMenu {
+		return
+	}
+	if mode == day {
+		return
+	}
+	mode = day
+	stop <- struct{}{}
+
+	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)
+}
+
+func changeModeToMinute() {
+	if isSelectMenu {
+		return
+	}
+	if mode == min {
+		return
+	}
+	mode = min
+	stop <- struct{}{}
+
+	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)
 }
 
 var isSelectMenu = false
@@ -96,17 +125,19 @@ var oldX, oldY = x, y
 var menu = []config{
 	{"sh", "000001", "上证指数"},
 	{"sh", "000300", "沪深300"},
+	{"sh", "600519", "贵州茅台"},
 	{"sz", "399006", "创业扳指"},
-	{"sz", "603103", "横店影视"},
-	{"sz", "600519", "贵州茅台"},
+	{"sh", "603103", "横店影视"},
 	{"sz", "000651", "格力电器"},
-	{"sz", "601318", "中国平安"},
+	{"sh", "601318", "中国平安"},
 }
 
 func selectMenu() {
 	if isSelectMenu {
 		return
 	}
+
+	oldX, oldY = x, y
 	isSelectMenu = true
 	stop <- struct{}{}
 	flush()
