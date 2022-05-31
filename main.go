@@ -82,6 +82,12 @@ func main() {
 		area = "sh"
 	}
 
+	var _, name = GetFlagAndArgs([]string{"name", "--name", "-n"}, os.Args[1:])
+
+	if code != "000001" && area != "sh" {
+		menu = append([]config{{area, code, name}}, menu...)
+	}
+
 	renderStockByCodeAndArea(area, code)
 
 	select {}
