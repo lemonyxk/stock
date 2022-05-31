@@ -190,7 +190,7 @@ func realData(area, code string) string {
 	var currentPrice = dataArr[3]
 	// var startPrice = dataArr[4]
 	var openPrice = dataArr[5]
-	var date = dataArr[30][:8]
+	var date = strings.Replace(dataArr[30], "-", "", -1)[:8]
 	date = date[:4] + "-" + date[4:6] + "-" + date[6:]
 	var absoluteChange = dataArr[31]
 	var percentChange = dataArr[32]
