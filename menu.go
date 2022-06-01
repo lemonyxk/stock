@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/eiannone/keyboard"
 	"github.com/lemonyxk/console"
@@ -40,31 +41,33 @@ func init() {
 				panic(err)
 			}
 
-			switch key {
-			case 0xffea:
-				ctrlC(key)
-			case 0xffeb:
-				ctrlC(key)
-			case 0xffec:
-				ctrlC(key)
-			case 0xffed:
-				ctrlC(key)
-			case 0x000d:
-				ctrlC(key)
-			default:
-				switch char {
-				case 'l':
-					selectMenu()
-				case 'd':
-					changeModeToDay()
-				case 'm':
-					changeModeToMinute()
-				case 'q':
-					exit()
+			go func() {
+				switch key {
+				case 0xffea:
+					ctrlC(key)
+				case 0xffeb:
+					ctrlC(key)
+				case 0xffec:
+					ctrlC(key)
+				case 0xffed:
+					ctrlC(key)
+				case 0x000d:
+					ctrlC(key)
 				default:
-					// exit()
+					switch char {
+					case 'l':
+						selectMenu()
+					case 'd':
+						changeModeToDay()
+					case 'm':
+						changeModeToMinute()
+					case 'q':
+						exit()
+					default:
+						// exit()
+					}
 				}
-			}
+			}()
 
 			time.Sleep(time.Millisecond * 50)
 		}
@@ -76,8 +79,8 @@ func menuTips() {
 	if mode == day {
 		sm += " 365"
 	}
-	var str = "[Mode: " + sm + "] [Q:Quit]\r\n"
-	var s = strings.Repeat(" ", (termWidth-8-len(str))/2)
+	var str = "[Mode: " + sm + "] [Q: Quit]\r\n"
+	var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(str))/2)
 	write(console.FgYellow.Sprint(s + str))
 }
 

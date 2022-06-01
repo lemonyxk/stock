@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/guptarohit/asciigraph"
 	"github.com/json-iterator/go"
@@ -70,6 +71,12 @@ var stop = make(chan struct{})
 
 var mode = min
 
+var size, _ = ts.GetSize()
+var termWidth, termHeight = size.Col(), size.Row()
+
+var minWidth = utf8.RuneCountInString(`[Mode: day 365] [Q: Quit] [L: List] [M: Min K] [D: Day K]`) + 8
+var minHeight = 6 + 3
+
 func main() {
 
 	var _, code = GetFlagAndArgs([]string{"code", "--code", "-c"}, os.Args[1:])
@@ -80,6 +87,26 @@ func main() {
 	var _, area = GetFlagAndArgs([]string{"area", "--area", "-a"}, os.Args[1:])
 	if area == "" {
 		area = "sh"
+	}
+
+	// width
+	var _, w = GetFlagAndArgs([]string{"width", "--width", "-w"}, os.Args[1:])
+	var width, _ = strconv.Atoi(w)
+	if width > 0 && width < 100 {
+		termWidth = termWidth * width / 100
+		if termWidth < minWidth {
+			termWidth = minWidth
+		}
+	}
+
+	// height
+	var _, h = GetFlagAndArgs([]string{"height", "--height", "-h"}, os.Args[1:])
+	var height, _ = strconv.Atoi(h)
+	if height > 0 && height < 100 {
+		termHeight = termHeight * height / 100
+		if termHeight < minHeight {
+			termHeight = minHeight
+		}
 	}
 
 	var _, name = GetFlagAndArgs([]string{"name", "--name", "-n"}, os.Args[1:])
@@ -93,16 +120,13 @@ func main() {
 	select {}
 }
 
-var size, _ = ts.GetSize()
-var termWidth, termHeight = size.Col(), size.Row()
-
 func tips() {
 	var sm = mode
 	if mode == day {
 		sm += " 365"
 	}
-	var str = "[Mode: " + sm + "] [Q:Quit] [L:List] [M:Change to min K] [D: Change to day K] \r\n"
-	var s = strings.Repeat(" ", (termWidth-8-len(str))/2)
+	var str = "[Mode: " + sm + "] [Q: Quit] [L: List] [M: Min K] [D: Day K] \r\n"
+	var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(str))/2)
 	write(console.FgYellow.Sprint(s + str))
 }
 
@@ -129,7 +153,7 @@ func dayRender(area, code string) {
 			priceData,
 			asciigraph.Width(termWidth-8),
 			asciigraph.Height(termHeight-3),
-			asciigraph.Caption(realStr),
+			// asciigraph.Caption(),
 		)
 
 		flush()
@@ -137,6 +161,10 @@ func dayRender(area, code string) {
 		tips()
 
 		write(graph)
+
+		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr))/2)
+
+		write("\n" + s + realStr)
 
 		index++
 	}
@@ -174,7 +202,7 @@ func minRender(area, code string) {
 			priceData,
 			asciigraph.Width(termWidth-8),
 			asciigraph.Height(termHeight-3),
-			asciigraph.Caption(realStr),
+			// asciigraph.Caption(realStr),
 		)
 
 		if isSelectMenu {
@@ -186,6 +214,10 @@ func minRender(area, code string) {
 		tips()
 
 		write(graph)
+
+		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr))/2)
+
+		write("\n" + s + realStr)
 
 		index++
 	}
@@ -322,12 +354,19 @@ func realData(area, code string) (string, string, float64) {
 		percentStr = console.FgGreen.Sprintf("%s %.2f%%", absoluteChange, percent)
 	}
 
-	var ts = fmt.Sprintf(
-		"%s %s %s current: %s ( %s ) lowest: %s hightest: %s open: %s [ %s %.2fms ]",
+	var st = fmt.Sprintf(
+		"%s %s %s N: %s ( %s ) L: %s H: %s O: %s [%s %.2fms]",
 		date, title, co, currentPrice, percentStr,
 		lowestPrice, highestPrice, openPrice, now.Format("15:04:05"),
 		float64(sub.Milliseconds())/1000.0*1000,
 	)
 
-	return ts, absoluteChange, percent
+	if utf8.RuneCountInString(st) > termWidth {
+		st = fmt.Sprintf(
+			"%s %s %s N: %s ( %s )",
+			date, title, co, currentPrice, percentStr,
+		)
+	}
+
+	return st, absoluteChange, percent
 }
