@@ -13,12 +13,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/eiannone/keyboard"
+	"github.com/lemonyxk/console"
 )
 
 var Stdout = os.Stdout
+
+var stopMenu = make(chan struct{})
 
 func init() {
 
@@ -65,6 +69,16 @@ func init() {
 			time.Sleep(time.Millisecond * 50)
 		}
 	}()
+}
+
+func menuTips() {
+	var sm = mode
+	if mode == day {
+		sm += " 365"
+	}
+	var str = "[Mode: " + sm + "] [Q:Quit]\r\n"
+	var s = strings.Repeat(" ", (termWidth-8-len(str))/2)
+	write(console.FgYellow.Sprint(s + str))
 }
 
 func changeModeToDay() {
@@ -114,22 +128,24 @@ func exit() {
 }
 
 type config struct {
-	area string
-	code string
-	name string
+	area    string
+	code    string
+	name    string
+	change  string
+	percent string
 }
 
 var x, y = 2, 1
 var oldX, oldY = x, y
 
 var menu = []config{
-	{"sh", "000001", "上证指数"},
-	{"sh", "000300", "沪深300"},
-	{"sh", "600519", "贵州茅台"},
-	{"sz", "399006", "创业扳指"},
-	{"sh", "603103", "横店影视"},
-	{"sz", "000651", "格力电器"},
-	{"sh", "601318", "中国平安"},
+	{area: "sh", code: "000001", name: "上证指数"},
+	{area: "sh", code: "000300", name: "沪深300"},
+	{area: "sh", code: "600519", name: "贵州茅台"},
+	{area: "sz", code: "399006", name: "创业扳指"},
+	{area: "sh", code: "603103", name: "横店影视"},
+	{area: "sz", code: "000651", name: "格力电器"},
+	{area: "sh", code: "601318", name: "中国平安"},
 }
 
 func selectMenu() {
@@ -140,15 +156,66 @@ func selectMenu() {
 	oldX, oldY = x, y
 	isSelectMenu = true
 	stop <- struct{}{}
-	flush()
 
-	tips()
+	renderMenu()
+}
 
-	for i := 0; i < len(menu); i++ {
-		write(fmt.Sprintf(" %d %s %s %s\n", i+1, menu[i].area, menu[i].code, menu[i].name))
+func renderMenu() {
+
+	var ticker = time.NewTicker(time.Second * 3)
+
+	var fn = func(need bool) {
+		var table = console.NewTable()
+		table.Style().Options.DrawBorder = false
+		table.Style().Options.SeparateColumns = false
+
+		for i := 0; i < len(menu); i++ {
+			var change = menu[i].change
+			var percentStr = menu[i].percent
+			if need {
+				_, absoluteChange, percent := realData(menu[i].area, menu[i].code)
+				if percent >= 0 {
+					change = console.FgRed.Sprintf("+%s", absoluteChange)
+					percentStr = console.FgRed.Sprintf("+%.2f%%", percent)
+				} else {
+					change = console.FgGreen.Sprintf("%s", absoluteChange)
+					percentStr = console.FgGreen.Sprintf("%.2f%%", percent)
+				}
+				time.Sleep(time.Millisecond * 100)
+				menu[i].change = change
+				menu[i].percent = percentStr
+			}
+			table.Row(menu[i].name, menu[i].area, menu[i].code, change, percentStr)
+			// write(fmt.Sprintf(" %s %s %s\n", menu[i].name, menu[i].area, menu[i].code))
+		}
+
+		if !isSelectMenu {
+			return
+		}
+
+		flush()
+
+		menuTips()
+
+		write(table.Render())
+
+		resetCursor()
 	}
 
-	resetCursor()
+	fn(false)
+	go fn(true)
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				go fn(true)
+			case <-stopMenu:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }
 
 func ctrlC(key keyboard.Key) {
@@ -175,11 +242,13 @@ func resetCursor() {
 }
 
 func reset() {
+	stopMenu <- struct{}{}
 	isSelectMenu = false
 	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)
 }
 
 func enter() {
+	stopMenu <- struct{}{}
 	isSelectMenu = false
 	x, y = oldX, oldY
 	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)

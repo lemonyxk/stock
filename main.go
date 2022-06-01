@@ -85,7 +85,7 @@ func main() {
 	var _, name = GetFlagAndArgs([]string{"name", "--name", "-n"}, os.Args[1:])
 
 	if code != "000001" && area != "sh" {
-		menu = append([]config{{area, code, name}}, menu...)
+		menu = append([]config{{area, code, name, "", ""}}, menu...)
 	}
 
 	renderStockByCodeAndArea(area, code)
@@ -122,11 +122,13 @@ func dayRender(area, code string) {
 			getDayData(area, code)
 		}
 
+		var realStr, _, _ = realData(area, code)
+
 		graph := asciigraph.Plot(
 			priceData,
 			asciigraph.Width(termWidth-8),
 			asciigraph.Height(termHeight-3),
-			asciigraph.Caption(realData(area, code)),
+			asciigraph.Caption(realStr),
 		)
 
 		flush()
@@ -149,6 +151,7 @@ func dayRender(area, code string) {
 			case <-timer.C:
 				fn()
 			case <-stop:
+				timer.Stop()
 				return
 			}
 		}
@@ -164,12 +167,18 @@ func minRender(area, code string) {
 			getMinData(area, code)
 		}
 
+		var realStr, _, _ = realData(area, code)
+
 		graph := asciigraph.Plot(
 			priceData,
 			asciigraph.Width(termWidth-8),
 			asciigraph.Height(termHeight-3),
-			asciigraph.Caption(realData(area, code)),
+			asciigraph.Caption(realStr),
 		)
+
+		if isSelectMenu {
+			return
+		}
 
 		flush()
 
@@ -180,7 +189,7 @@ func minRender(area, code string) {
 		index++
 	}
 
-	fn()
+	go fn()
 
 	var timer = time.NewTicker(time.Second * 3)
 
@@ -189,7 +198,7 @@ func minRender(area, code string) {
 		for {
 			select {
 			case <-timer.C:
-				fn()
+				go fn()
 			case <-stop:
 				return
 			}
@@ -266,7 +275,7 @@ func StringToFloat(str string) float64 {
 	return f
 }
 
-func realData(area, code string) string {
+func realData(area, code string) (string, string, float64) {
 
 	var now = time.Now()
 
@@ -279,14 +288,14 @@ func realData(area, code string) string {
 	var arr = strings.Split(str, "=")
 	var data = arr[1]
 	if len(data) < 2 {
-		return ""
+		return "", "", 0
 	}
 
 	data = strings.Replace(data, "\"", "", -1)
 	data = strings.Replace(data, ";", "", -1)
 	var dataArr = strings.Split(data, "~")
 	if len(dataArr) < 6 {
-		return ""
+		return "", "", 0
 	}
 
 	var title = dataArr[1]
@@ -306,7 +315,7 @@ func realData(area, code string) string {
 
 	var percentStr string
 
-	if percent > 0 {
+	if percent >= 0 {
 		percentStr = console.FgRed.Sprintf("+%s +%.2f%%", absoluteChange, percent)
 	} else {
 		percentStr = console.FgGreen.Sprintf("%s %.2f%%", absoluteChange, percent)
@@ -319,5 +328,5 @@ func realData(area, code string) string {
 		float64(sub.Milliseconds())/1000.0*1000,
 	)
 
-	return ts
+	return ts, absoluteChange, percent
 }
