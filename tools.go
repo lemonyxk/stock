@@ -16,10 +16,32 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
+
+func StringToFloat(str string) float64 {
+	f, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		return 0
+	}
+	return f
+}
+
+func GetFlagAndArgs(flag []string, args []string) (string, string) {
+	for i := 0; i < len(args); i++ {
+		for j := 0; j < len(flag); j++ {
+			if args[i] == flag[j] {
+				if i+1 < len(args) {
+					return flag[j], args[i+1]
+				}
+			}
+		}
+	}
+	return "", ""
+}
 
 func GbkToUtf8(s []byte) ([]byte, error) {
 	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
