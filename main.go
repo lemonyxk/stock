@@ -22,7 +22,7 @@ import (
 	"github.com/json-iterator/go"
 	"github.com/lemonyxk/console"
 	"github.com/lemonyxk/kitty/v2/socket/http/client"
-	"golang.org/x/term"
+	"github.com/olekukonko/ts"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
@@ -93,7 +93,8 @@ func main() {
 	select {}
 }
 
-var termWidth, termHeight, _ = term.GetSize(int(os.Stdin.Fd()))
+var size, _ = ts.GetSize()
+var termWidth, termHeight = size.Col(), size.Row()
 
 func tips() {
 	var sm = mode

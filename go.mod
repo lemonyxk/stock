@@ -8,7 +8,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/lemonyxk/console v0.0.0-20220524105508-19a1ac7f4c08
 	github.com/lemonyxk/kitty/v2 v2.0.0-20220526150030-f427b7b1962b
-	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467
+	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	golang.org/x/text v0.3.6
 )
 
