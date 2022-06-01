@@ -19,10 +19,10 @@ import (
 	"time"
 
 	"github.com/guptarohit/asciigraph"
-	jsoniter "github.com/json-iterator/go"
+	"github.com/json-iterator/go"
 	"github.com/lemonyxk/console"
 	"github.com/lemonyxk/kitty/v2/socket/http/client"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
@@ -93,7 +93,7 @@ func main() {
 	select {}
 }
 
-var termWidth, termHeight, _ = terminal.GetSize(int(os.Stdin.Fd()))
+var termWidth, termHeight, _ = term.GetSize(int(os.Stdin.Fd()))
 
 func tips() {
 	var sm = mode
