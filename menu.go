@@ -110,8 +110,7 @@ func changeModeToMinute() {
 var isSelectMenu = false
 
 func flush() {
-	write("\x1bc")
-	write("\033[H\033[3J")
+	write("\033[H\033[J")
 }
 
 func write(str string) {
