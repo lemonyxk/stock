@@ -121,7 +121,7 @@ func changeModeToDay() {
 		isDataRun = false
 	}
 
-	renderStockByCodeAndArea(menu[x-2].Area, menu[x-2].Code)
+	renderStockByCodeAndArea(menu[x-fixX].Area, menu[x-fixX].Code)
 }
 
 func changeModeToMinute() {
@@ -139,7 +139,7 @@ func changeModeToMinute() {
 		isDataRun = false
 	}
 
-	renderStockByCodeAndArea(menu[x-2].Area, menu[x-2].Code)
+	renderStockByCodeAndArea(menu[x-fixX].Area, menu[x-fixX].Code)
 }
 
 var isSelectMenu = false
@@ -176,7 +176,9 @@ type config struct {
 	// Percent string
 }
 
-var x, y = 2, 1
+var fixX = 3
+
+var x, y = fixX, 1
 var oldX, oldY = x, y
 
 var menu []config
@@ -337,7 +339,7 @@ func enter() {
 	stopMenu <- struct{}{}
 	isSelectMenu = false
 	x, y = oldX, oldY
-	renderStockByCodeAndArea(menu[x-2].Area, menu[x-2].Code)
+	renderStockByCodeAndArea(menu[x-fixX].Area, menu[x-fixX].Code)
 }
 
 func left() {}
@@ -345,14 +347,14 @@ func left() {}
 func right() {}
 
 func up() {
-	if oldX > 1+1 {
+	if oldX > fixX {
 		oldX--
 		resetCursor()
 	}
 }
 
 func down() {
-	if oldX < len(menu)+1 {
+	if oldX < len(menu)+fixX-1 {
 		oldX++
 		resetCursor()
 	}

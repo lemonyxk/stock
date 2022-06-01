@@ -31,5 +31,5 @@ func tips() {
 func menuTips() {
 	var str = fmt.Sprintf("[Q: Quit] [↵: Enter] [↑↓: Move] [E: Edit] [%d]\r\n", runningProcess)
 	var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(str))/2)
-	write(console.FgYellow.Sprint(s + str))
+	write(console.FgYellow.Sprint(s + str + "\n"))
 }

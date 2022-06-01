@@ -55,7 +55,7 @@ func dayRender(area, code string) {
 
 		write(graph)
 
-		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2)
+		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2+4)
 
 		write("\n" + s + realStr[0])
 
@@ -112,7 +112,7 @@ func minRender(area, code string) {
 
 		write(graph)
 
-		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2)
+		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2+4)
 
 		write("\n" + s + realStr[0])
 
