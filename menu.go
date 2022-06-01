@@ -13,12 +13,15 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/eiannone/keyboard"
 	"github.com/lemonyxk/console"
+	"github.com/lemonyxk/utils/v3"
 )
 
 var Stdout = os.Stdout
@@ -26,6 +29,10 @@ var Stdout = os.Stdout
 var stopMenu = make(chan struct{})
 
 func init() {
+	start()
+}
+
+func start() {
 
 	go func() {
 
@@ -41,37 +48,61 @@ func init() {
 				panic(err)
 			}
 
-			go func() {
-				switch key {
-				case 0xffea:
-					ctrlC(key)
-				case 0xffeb:
-					ctrlC(key)
-				case 0xffec:
-					ctrlC(key)
-				case 0xffed:
-					ctrlC(key)
-				case 0x000d:
-					ctrlC(key)
+			switch key {
+			case 0xffea:
+				ctrlC(key)
+			case 0xffeb:
+				ctrlC(key)
+			case 0xffec:
+				ctrlC(key)
+			case 0xffed:
+				ctrlC(key)
+			case 0x000d:
+				ctrlC(key)
+			default:
+				switch char {
+				case 'l':
+					selectMenu()
+				case 'd':
+					changeModeToDay()
+				case 'm':
+					changeModeToMinute()
+				case 'e':
+					go editMenu()
+					return
+				case 'q':
+					exit()
 				default:
-					switch char {
-					case 'l':
-						selectMenu()
-					case 'd':
-						changeModeToDay()
-					case 'm':
-						changeModeToMinute()
-					case 'q':
-						exit()
-					default:
-						// exit()
-					}
+					// exit()
 				}
-			}()
+			}
 
 			time.Sleep(time.Millisecond * 50)
 		}
 	}()
+}
+
+func editMenu() {
+	if !isSelectMenu {
+		return
+	}
+
+	stopMenu <- struct{}{}
+
+	flush()
+
+	isEditMenu = true
+
+	editFile(configPath)
+
+	var res = utils.File.ReadFromPath(configPath)
+	_ = utils.Json.Decode(res.Bytes(), &menu)
+
+	isEditMenu = false
+
+	start()
+
+	renderMenu()
 }
 
 func menuTips() {
@@ -79,7 +110,7 @@ func menuTips() {
 	if mode == day {
 		sm += " 365"
 	}
-	var str = "[Mode: " + sm + "] [Q: Quit]\r\n"
+	var str = "[Mode: " + sm + "] [Q: Quit] [E: Edit]\r\n"
 	var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(str))/2)
 	write(console.FgYellow.Sprint(s + str))
 }
@@ -94,7 +125,7 @@ func changeModeToDay() {
 	mode = day
 	stop <- struct{}{}
 
-	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)
+	renderStockByCodeAndArea(menu[x-2].Area, menu[x-2].Code)
 }
 
 func changeModeToMinute() {
@@ -107,10 +138,11 @@ func changeModeToMinute() {
 	mode = min
 	stop <- struct{}{}
 
-	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)
+	renderStockByCodeAndArea(menu[x-2].Area, menu[x-2].Code)
 }
 
 var isSelectMenu = false
+var isEditMenu = false
 
 func flush() {
 	write("\033[H\033[J")
@@ -130,25 +162,25 @@ func exit() {
 }
 
 type config struct {
-	area    string
-	code    string
-	name    string
-	change  string
-	percent string
+	Area    string
+	Code    string
+	Name    string
+	Change  string
+	Percent string
 }
 
 var x, y = 2, 1
 var oldX, oldY = x, y
 
-var menu = []config{
-	{area: "sh", code: "000001", name: "上证指数"},
-	{area: "sh", code: "000300", name: "沪深300"},
-	{area: "sh", code: "600519", name: "贵州茅台"},
-	{area: "sz", code: "399006", name: "创业扳指"},
-	{area: "sh", code: "603103", name: "横店影视"},
-	{area: "sz", code: "000651", name: "格力电器"},
-	{area: "sh", code: "601318", name: "中国平安"},
-}
+var menu []config
+
+// {area: "sh", code: "000001", name: "上证指数"},
+// {area: "sh", code: "000300", name: "沪深300"},
+// {area: "sh", code: "600519", name: "贵州茅台"},
+// {area: "sz", code: "399006", name: "创业扳指"},
+// {area: "sh", code: "603103", name: "横店影视"},
+// {area: "sz", code: "000651", name: "格力电器"},
+// {area: "sh", code: "601318", name: "中国平安"},
 
 func selectMenu() {
 	if isSelectMenu {
@@ -172,10 +204,10 @@ func renderMenu() {
 		table.Style().Options.SeparateColumns = false
 
 		for i := 0; i < len(menu); i++ {
-			var change = menu[i].change
-			var percentStr = menu[i].percent
+			var change = menu[i].Change
+			var percentStr = menu[i].Percent
 			if need {
-				_, absoluteChange, percent := realData(menu[i].area, menu[i].code)
+				_, absoluteChange, percent := realData(menu[i].Area, menu[i].Code)
 				if percent >= 0 {
 					change = console.FgRed.Sprintf("+%s", absoluteChange)
 					percentStr = console.FgRed.Sprintf("+%.2f%%", percent)
@@ -184,14 +216,18 @@ func renderMenu() {
 					percentStr = console.FgGreen.Sprintf("%.2f%%", percent)
 				}
 				time.Sleep(time.Millisecond * 100)
-				menu[i].change = change
-				menu[i].percent = percentStr
+				menu[i].Change = change
+				menu[i].Percent = percentStr
 			}
-			table.Row(menu[i].name, menu[i].area, menu[i].code, change, percentStr)
+			table.Row(menu[i].Name, menu[i].Area, menu[i].Code, change, percentStr)
 			// write(fmt.Sprintf(" %s %s %s\n", menu[i].name, menu[i].area, menu[i].code))
 		}
 
 		if !isSelectMenu {
+			return
+		}
+
+		if isEditMenu {
 			return
 		}
 
@@ -246,14 +282,14 @@ func resetCursor() {
 func reset() {
 	stopMenu <- struct{}{}
 	isSelectMenu = false
-	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)
+	renderStockByCodeAndArea(menu[x-2].Area, menu[x-2].Code)
 }
 
 func enter() {
 	stopMenu <- struct{}{}
 	isSelectMenu = false
 	x, y = oldX, oldY
-	renderStockByCodeAndArea(menu[x-2].area, menu[x-2].code)
+	renderStockByCodeAndArea(menu[x-2].Area, menu[x-2].Code)
 }
 
 func left() {}
@@ -272,4 +308,20 @@ func down() {
 		oldX++
 		resetCursor()
 	}
+}
+
+// edit mode like git
+func editFile(file string) {
+	var cmd *exec.Cmd
+
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/c", "notepad "+file)
+	} else {
+		cmd = exec.Command(os.Getenv("SHELL"), "-c", "vim "+file)
+	}
+
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
 }

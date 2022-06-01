@@ -10,10 +10,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -23,19 +22,9 @@ import (
 	"github.com/json-iterator/go"
 	"github.com/lemonyxk/console"
 	"github.com/lemonyxk/kitty/v2/socket/http/client"
+	"github.com/lemonyxk/utils/v3"
 	"github.com/olekukonko/ts"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 )
-
-func GbkToUtf8(s []byte) ([]byte, error) {
-	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
-	d, e := ioutil.ReadAll(reader)
-	if e != nil {
-		return nil, e
-	}
-	return d, nil
-}
 
 // 分钟
 var minURL = `https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=`
@@ -77,16 +66,47 @@ var termWidth, termHeight = size.Col(), size.Row()
 var minWidth = utf8.RuneCountInString(`[Mode: day 365] [Q: Quit] [L: List] [M: Min K] [D: Day K]`) + 8
 var minHeight = 6 + 3
 
+var home = HomeDir()
+
+var configPath = filepath.Join(home, ".stock", "config.json")
+
 func main() {
+
+	_ = os.MkdirAll(filepath.Dir(configPath), os.ModePerm)
+
+	if !utils.File.IsExist(configPath) {
+		var err = utils.File.ReadFromBytes([]byte(`[{"Area":"sh","Code":"000001","Name":"上证指数"}]`)).WriteToPath(configPath)
+		if err != nil {
+			println(err.Error())
+			return
+		}
+	}
+
+	var res = utils.File.ReadFromPath(configPath)
+	if res.LastError() != nil {
+		println(res.LastError().Error())
+		return
+	}
+
+	var err = utils.Json.Decode(res.Bytes(), &menu)
+	if err != nil {
+		println(err.Error())
+		return
+	}
+
+	if len(menu) == 0 {
+		println("No stock in config")
+		return
+	}
 
 	var _, code = GetFlagAndArgs([]string{"code", "--code", "-c"}, os.Args[1:])
 	if code == "" {
-		code = "000001"
+		code = menu[0].Code
 	}
 
 	var _, area = GetFlagAndArgs([]string{"area", "--area", "-a"}, os.Args[1:])
 	if area == "" {
-		area = "sh"
+		area = menu[0].Area
 	}
 
 	// width
@@ -111,7 +131,7 @@ func main() {
 
 	var _, name = GetFlagAndArgs([]string{"name", "--name", "-n"}, os.Args[1:])
 
-	if code != "000001" && area != "sh" {
+	if code != menu[0].Code && area != menu[0].Area {
 		menu = append([]config{{area, code, name, "", ""}}, menu...)
 	}
 
