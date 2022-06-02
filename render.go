@@ -16,7 +16,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/guptarohit/asciigraph"
+	"github.com/lemonyxk/stock/line"
 )
 
 func renderStockByCodeAndArea(area, code string) {
@@ -42,18 +42,26 @@ func dayRender(area, code string) {
 			return
 		}
 
-		graph := asciigraph.Plot(
-			priceData,
-			asciigraph.Width(termWidth-8),
-			asciigraph.Height(termHeight-3),
-			// asciigraph.Caption(),
-		)
+		var l = line.New([]string{
+			time.Now().AddDate(0, 0, -365).Format("2006-01-02"),
+			time.Now().AddDate(0, 0, -270).Format("2006-01-02"),
+			time.Now().AddDate(0, 0, -180).Format("2006-01-02"),
+			time.Now().AddDate(0, 0, -90).Format("2006-01-02"),
+			time.Now().Format("2006-01-02"),
+		}, priceData)
+		l.SetSize(termWidth-1, termHeight-2)
+		// graph := asciigraph.Plot(
+		// 	priceData,
+		// 	asciigraph.Width(termWidth-8),
+		// 	asciigraph.Height(termHeight-3),
+		// 	// asciigraph.Caption(),
+		// )
 
 		flush()
 
 		tips()
 
-		write(graph)
+		write(l.Render())
 
 		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2+4)
 
@@ -95,12 +103,15 @@ func minRender(area, code string) {
 			return
 		}
 
-		graph := asciigraph.Plot(
-			priceData,
-			asciigraph.Width(termWidth-8),
-			asciigraph.Height(termHeight-3),
-			// asciigraph.Caption(realStr),
-		)
+		var l = line.New([]string{"09:30"}, priceData)
+		l.SetSize(termWidth-1, termHeight-2)
+
+		// graph := asciigraph.Plot(
+		// 	priceData,
+		// 	asciigraph.Width(termWidth-8),
+		// 	asciigraph.Height(termHeight-3),
+		// 	// asciigraph.Caption(realStr),
+		// )
 
 		if isSelectMenu {
 			return
@@ -110,7 +121,7 @@ func minRender(area, code string) {
 
 		tips()
 
-		write(graph)
+		write(l.Render())
 
 		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2+4)
 

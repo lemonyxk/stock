@@ -21,7 +21,7 @@ import (
 	"github.com/lemonyxk/kitty/v2/socket/http/client"
 )
 
-var timeData []float64
+var timeData []string
 var priceData []float64
 
 func getMinData(area, code string) {
@@ -41,13 +41,13 @@ func getMinData(area, code string) {
 
 	for _, v := range arr {
 		var a = strings.Split(v, " ")
-		timeData = append(timeData, StringToFloat(a[0]))
+		timeData = append(timeData, a[0])
 		priceData = append(priceData, StringToFloat(a[1]))
 	}
 
 	// the lib is not support the nil value
 	if len(timeData) == 0 || len(priceData) == 0 {
-		timeData = append(timeData, 930)
+		timeData = append(timeData, "0930")
 		priceData = append(priceData, 0)
 	}
 
@@ -69,13 +69,13 @@ func getDayData(area, code string) {
 	_ = jsoniter.Unmarshal([]byte(arrStr), &arr)
 
 	for _, dayArr := range arr {
-		timeData = append(timeData, StringToFloat(dayArr[0]))
+		timeData = append(timeData, dayArr[0])
 		priceData = append(priceData, StringToFloat(dayArr[2]))
 	}
 
 	// the lib is not support the nil value
 	if len(timeData) == 0 || len(priceData) == 0 {
-		timeData = append(timeData, 930)
+		timeData = append(timeData, time.Now().AddDate(0, 0, -365).Format("2006-01-02"))
 		priceData = append(priceData, 0)
 	}
 

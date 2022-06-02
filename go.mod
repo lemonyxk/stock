@@ -8,6 +8,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/lemonyxk/console v0.0.0-20220524105508-19a1ac7f4c08
 	github.com/lemonyxk/kitty/v2 v2.0.0-20220526150030-f427b7b1962b
+	github.com/lemonyxk/utils/v3 v3.0.0-20220529034331-8c9d334a8a60
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	golang.org/x/text v0.3.6
 )
@@ -20,7 +21,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible // indirect
 	github.com/lemonyxk/caller v0.0.0-20220509170816-21e0d3de952f // indirect
-	github.com/lemonyxk/utils/v3 v3.0.0-20220529034331-8c9d334a8a60 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
