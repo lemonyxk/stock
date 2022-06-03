@@ -16,7 +16,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/lemonyxk/stock/line"
+	"github.com/lemonyxk/charts"
 )
 
 func renderStockByCodeAndArea(area, code string) {
@@ -42,7 +42,7 @@ func dayRender(area, code string) {
 			return
 		}
 
-		var l = line.New([]string{
+		var l = charts.New([]string{
 			time.Now().AddDate(0, 0, -365).Format("2006-01-02"),
 			time.Now().AddDate(0, 0, -270).Format("2006-01-02"),
 			time.Now().AddDate(0, 0, -180).Format("2006-01-02"),
@@ -103,7 +103,7 @@ func minRender(area, code string) {
 			return
 		}
 
-		var l = line.New([]string{"09:30"}, priceData)
+		var l = charts.New([]string{"09:30"}, priceData)
 		l.SetSize(termWidth-1, termHeight-2)
 
 		// graph := asciigraph.Plot(
