@@ -21,7 +21,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible // indirect
 	github.com/lemonyxk/caller v0.0.0-20220509170816-21e0d3de952f // indirect
-	github.com/lemonyxk/charts v0.0.0-20220604140343-82a73e2bcb9a // indirect
+	github.com/lemonyxk/charts v0.0.0-20220604145438-c48faac34543 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

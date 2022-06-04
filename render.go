@@ -50,6 +50,7 @@ func dayRender(area, code string) {
 			time.Now().Format("2006-01-02"),
 		}, priceData)
 		l.SetSize(termWidth-1, termHeight-2)
+		l.SetYPrecision(2)
 		// graph := asciigraph.Plot(
 		// 	priceData,
 		// 	asciigraph.Width(termWidth-8),
@@ -105,6 +106,7 @@ func minRender(area, code string) {
 
 		var l = charts.New(timeData, priceData)
 		l.SetSize(termWidth-1, termHeight-2)
+		l.SetYPrecision(2)
 
 		// graph := asciigraph.Plot(
 		// 	priceData,
