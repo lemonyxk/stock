@@ -14,8 +14,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"unicode/utf8"
 
+	"github.com/jedib0t/go-pretty/text"
 	"github.com/json-iterator/go"
 	"github.com/lemonyxk/console"
 	"github.com/lemonyxk/kitty/v2/socket/http/client"
@@ -165,7 +165,7 @@ func renderRealData(data [][]string) []string {
 			float64(sub.Milliseconds())/1000.0*1000,
 		)
 
-		if utf8.RuneCountInString(st) > termWidth {
+		if text.RuneCount(st) > termWidth {
 			st = fmt.Sprintf(
 				"%s %s %s N: %s ( %s )",
 				date, title, co, currentPrice, percentStr,

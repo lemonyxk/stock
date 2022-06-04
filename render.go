@@ -14,8 +14,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-	"unicode/utf8"
 
+	"github.com/jedib0t/go-pretty/text"
 	"github.com/lemonyxk/charts"
 )
 
@@ -49,7 +49,7 @@ func dayRender(area, code string) {
 			time.Now().AddDate(0, 0, -90).Format("2006-01-02"),
 			time.Now().Format("2006-01-02"),
 		}, priceData)
-		l.SetSize(termWidth-1, termHeight-2)
+		l.SetSize(termWidth-1, termHeight-3)
 		l.SetYPrecision(2)
 		// graph := asciigraph.Plot(
 		// 	priceData,
@@ -64,9 +64,9 @@ func dayRender(area, code string) {
 
 		write(l.Render())
 
-		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2+4)
+		var s = strings.Repeat(" ", (termWidth-text.RuneCount(realStr[0]))/2)
 
-		write("\n" + s + realStr[0])
+		write("\n\n" + s + realStr[0])
 
 		index++
 	}
@@ -105,7 +105,7 @@ func minRender(area, code string) {
 		}
 
 		var l = charts.New(timeData, priceData)
-		l.SetSize(termWidth-1, termHeight-2)
+		l.SetSize(termWidth-1, termHeight-3)
 		l.SetYPrecision(2)
 
 		// graph := asciigraph.Plot(
@@ -125,9 +125,9 @@ func minRender(area, code string) {
 
 		write(l.Render())
 
-		var s = strings.Repeat(" ", (termWidth-utf8.RuneCountInString(realStr[0]))/2+4)
+		var s = strings.Repeat(" ", (termWidth-text.RuneCount(realStr[0]))/2)
 
-		write("\n" + s + realStr[0])
+		write("\n\n" + s + realStr[0])
 
 		index++
 	}

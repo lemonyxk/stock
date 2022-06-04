@@ -13,8 +13,8 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"unicode/utf8"
 
+	"github.com/jedib0t/go-pretty/text"
 	"github.com/lemonyxk/utils/v3"
 	"github.com/olekukonko/ts"
 )
@@ -47,7 +47,7 @@ var runningProcess int32 = 0
 var size, _ = ts.GetSize()
 var termWidth, termHeight = size.Col(), size.Row()
 
-var minWidth = utf8.RuneCountInString(`[Mode: day 365] [Q: Quit] [B: Back] [M: Min K] [D: Day K]`) + 8
+var minWidth = text.RuneCount(`[Mode: day 365] [Q: Quit] [B: Back] [M: Min K] [D: Day K]`)
 var minHeight = 6 + 3
 
 var home = HomeDir()
