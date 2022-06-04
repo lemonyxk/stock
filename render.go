@@ -17,6 +17,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/lemonyxk/charts"
+	"github.com/lemonyxk/console"
 )
 
 func renderStockByCodeAndArea(area, code string) {
@@ -51,6 +52,13 @@ func dayRender(area, code string) {
 		}, priceData)
 		l.SetSize(termWidth-1, termHeight-3)
 		l.SetYPrecision(2)
+		l.RenderSymbol = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, symbol string) string {
+			if lastValue <= value {
+				return console.FgRed.Sprint(symbol)
+			}
+
+			return console.FgGreen.Sprint(symbol)
+		}
 		// graph := asciigraph.Plot(
 		// 	priceData,
 		// 	asciigraph.Width(termWidth-8),
@@ -107,6 +115,21 @@ func minRender(area, code string) {
 		var l = charts.New(timeData, priceData)
 		l.SetSize(termWidth-1, termHeight-3)
 		l.SetYPrecision(2)
+		l.RenderSymbol = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, symbol string) string {
+			if lastValue <= value {
+				return console.FgRed.Sprint(symbol)
+			}
+
+			return console.FgGreen.Sprint(symbol)
+		}
+
+		// l.RenderEmpty = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, empty string) string {
+		// 	if lastValue <= value {
+		// 		return console.FgRed.Sprint(empty)
+		// 	}
+		//
+		// 	return console.FgGreen.Sprint(empty)
+		// }
 
 		// graph := asciigraph.Plot(
 		// 	priceData,
