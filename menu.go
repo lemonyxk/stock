@@ -44,7 +44,7 @@ func start() {
 		for {
 			char, key, err := keyboard.GetKey()
 			if err != nil {
-				panic(err)
+				exit()
 			}
 
 			switch key {
@@ -88,6 +88,8 @@ func editMenu() {
 		return
 	}
 
+	showCursor()
+
 	stopMenu <- struct{}{}
 
 	flush()
@@ -120,7 +122,7 @@ func changeModeToDay() {
 		stopData <- struct{}{}
 		isDataRun = false
 	}
-
+	hideCursor()
 	renderStockByCodeAndArea(menu[x-fixX].Area, menu[x-fixX].Code)
 }
 
@@ -138,7 +140,7 @@ func changeModeToMinute() {
 		stopData <- struct{}{}
 		isDataRun = false
 	}
-
+	hideCursor()
 	renderStockByCodeAndArea(menu[x-fixX].Area, menu[x-fixX].Code)
 }
 
@@ -165,7 +167,16 @@ func backMenu() {
 
 func exit() {
 	flush()
+	showCursor()
 	os.Exit(0)
+}
+
+func showCursor() {
+	write("\033[?25h")
+}
+
+func hideCursor() {
+	write("\033[?25l")
 }
 
 type config struct {
@@ -195,6 +206,8 @@ func selectMenu() {
 	if isSelectMenu {
 		return
 	}
+
+	showCursor()
 
 	oldX, oldY = x, y
 	isSelectMenu = true
@@ -339,6 +352,7 @@ func enter() {
 	stopMenu <- struct{}{}
 	isSelectMenu = false
 	x, y = oldX, oldY
+	hideCursor()
 	renderStockByCodeAndArea(menu[x-fixX].Area, menu[x-fixX].Code)
 }
 
