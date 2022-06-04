@@ -41,7 +41,8 @@ func getMinData(area, code string) {
 
 	for _, v := range arr {
 		var a = strings.Split(v, " ")
-		timeData = append(timeData, a[0])
+		var t = a[0][0:2] + ":" + a[0][2:]
+		timeData = append(timeData, t)
 		priceData = append(priceData, StringToFloat(a[1]))
 	}
 
@@ -69,8 +70,7 @@ func getDayData(area, code string) {
 	_ = jsoniter.Unmarshal([]byte(arrStr), &arr)
 
 	for _, dayArr := range arr {
-		var t = dayArr[0][0:2] + ":" + dayArr[0][2:]
-		timeData = append(timeData, t)
+		timeData = append(timeData, dayArr[0])
 		priceData = append(priceData, StringToFloat(dayArr[2]))
 	}
 

@@ -243,34 +243,41 @@ func renderMenu() {
 			params = append(params, menu[i].Area+menu[i].Code)
 		}
 
-		if need {
-			var data = realData(params)
-			for i := 0; i < len(data); i++ {
-				var percentStr = showStr[i].Percent
-				var change = showStr[i].Change
-				var absoluteChange = data[i][31]
-				var percent = StringToFloat(data[i][32])
-				var currentPrice = data[i][3]
-				var highestPrice = data[i][33]
-				var lowestPrice = data[i][34]
-				if percent >= 0 {
-					currentPrice = console.FgRed.Sprintf("↑ %s", currentPrice)
-					change = console.FgRed.Sprintf("+%s", absoluteChange)
-					percentStr = console.FgRed.Sprintf("+%.2f%%", percent)
-				} else {
-					currentPrice = console.FgGreen.Sprintf("↓ %s", currentPrice)
-					change = console.FgGreen.Sprintf("%s", absoluteChange)
-					percentStr = console.FgGreen.Sprintf("%.2f%%", percent)
-				}
-				highestPrice = console.FgHiRed.Sprintf("%s", highestPrice)
-				lowestPrice = console.FgHiGreen.Sprintf("%s", lowestPrice)
-
-				showStr[i].Change = change
-				showStr[i].Percent = percentStr
-				showStr[i].Current = currentPrice
-				showStr[i].HighestPrice = highestPrice
-				showStr[i].LowestPrice = lowestPrice
+		var data = realData(params)
+		for i := 0; i < len(data); i++ {
+			if !need {
+				showStr[i].Change = console.FgRed.Sprintf("+%s", "0")
+				showStr[i].Percent = console.FgRed.Sprintf("+%.2f%%", 0)
+				showStr[i].Current = console.FgRed.Sprintf("↑ %s", "0")
+				showStr[i].HighestPrice = console.FgHiRed.Sprintf("%s", "0")
+				showStr[i].LowestPrice = console.FgHiGreen.Sprintf("%s", "0")
+				continue
 			}
+
+			var percentStr = showStr[i].Percent
+			var change = showStr[i].Change
+			var absoluteChange = data[i][31]
+			var percent = StringToFloat(data[i][32])
+			var currentPrice = data[i][3]
+			var highestPrice = data[i][33]
+			var lowestPrice = data[i][34]
+			if percent >= 0 {
+				currentPrice = console.FgRed.Sprintf("↑ %s", currentPrice)
+				change = console.FgRed.Sprintf("+%s", absoluteChange)
+				percentStr = console.FgRed.Sprintf("+%.2f%%", percent)
+			} else {
+				currentPrice = console.FgGreen.Sprintf("↓ %s", currentPrice)
+				change = console.FgGreen.Sprintf("%s", absoluteChange)
+				percentStr = console.FgGreen.Sprintf("%.2f%%", percent)
+			}
+			highestPrice = console.FgHiRed.Sprintf("%s", highestPrice)
+			lowestPrice = console.FgHiGreen.Sprintf("%s", lowestPrice)
+
+			showStr[i].Change = change
+			showStr[i].Percent = percentStr
+			showStr[i].Current = currentPrice
+			showStr[i].HighestPrice = highestPrice
+			showStr[i].LowestPrice = lowestPrice
 		}
 
 		for i := 0; i < len(menu); i++ {
