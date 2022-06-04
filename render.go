@@ -103,7 +103,7 @@ func minRender(area, code string) {
 			return
 		}
 
-		var l = charts.New([]string{"09:30"}, priceData)
+		var l = charts.New(timeData, priceData)
 		l.SetSize(termWidth-1, termHeight-2)
 
 		// graph := asciigraph.Plot(

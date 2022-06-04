@@ -69,7 +69,8 @@ func getDayData(area, code string) {
 	_ = jsoniter.Unmarshal([]byte(arrStr), &arr)
 
 	for _, dayArr := range arr {
-		timeData = append(timeData, dayArr[0])
+		var t = dayArr[0][0:2] + ":" + dayArr[0][2:]
+		timeData = append(timeData, t)
 		priceData = append(priceData, StringToFloat(dayArr[2]))
 	}
 
