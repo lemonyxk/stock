@@ -247,7 +247,7 @@ func renderMenu() {
 		for i := 0; i < len(data); i++ {
 			if !need {
 				showStr[i].Change = console.FgRed.Sprintf("+%s", "0")
-				showStr[i].Percent = console.FgRed.Sprintf("+%.2f%%", 0)
+				showStr[i].Percent = console.FgRed.Sprintf("+%.2f%%", 0.00)
 				showStr[i].Current = console.FgRed.Sprintf("↑ %s", "0")
 				showStr[i].HighestPrice = console.FgHiRed.Sprintf("%s", "0")
 				showStr[i].LowestPrice = console.FgHiGreen.Sprintf("%s", "0")
