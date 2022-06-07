@@ -49,7 +49,7 @@ func dayRender(area, code string) {
 			time.Now().AddDate(0, 0, -180).Format("2006-01-02"),
 			time.Now().AddDate(0, 0, -90).Format("2006-01-02"),
 			time.Now().Format("2006-01-02"),
-		}, priceData)
+		}, priceData, 365)
 		l.SetSize(termWidth-1, termHeight-3)
 		l.SetYPrecision(2)
 		l.RenderSymbol = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, symbol string) string {
@@ -57,7 +57,12 @@ func dayRender(area, code string) {
 				return console.FgRed.Sprint(symbol)
 			}
 
-			return console.FgGreen.Sprint(symbol)
+			// return console.FgGreen.Sprint(symbol)
+			return symbol
+		}
+
+		l.RenderXBorder = func(isEmpty bool, x string) string {
+			return "━"
 		}
 		// graph := asciigraph.Plot(
 		// 	priceData,
@@ -112,7 +117,7 @@ func minRender(area, code string) {
 			return
 		}
 
-		var l = charts.New(timeData, priceData)
+		var l = charts.New([]string{"09:30", "13:00", "15:00"}, priceData, 240)
 		l.SetSize(termWidth-1, termHeight-3)
 		l.SetYPrecision(2)
 		l.RenderSymbol = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, symbol string) string {
@@ -120,16 +125,17 @@ func minRender(area, code string) {
 				return console.FgRed.Sprint(symbol)
 			}
 
-			return console.FgGreen.Sprint(symbol)
+			// return console.FgGreen.Sprint()
+			return symbol
 		}
 
-		// l.RenderEmpty = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, empty string) string {
-		// 	if lastValue <= value {
-		// 		return console.FgRed.Sprint(empty)
-		// 	}
-		//
-		// 	return console.FgGreen.Sprint(empty)
-		// }
+		l.RenderEmpty = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, empty string) string {
+			return " "
+		}
+
+		l.RenderXBorder = func(isEmpty bool, x string) string {
+			return "━"
+		}
 
 		// graph := asciigraph.Plot(
 		// 	priceData,

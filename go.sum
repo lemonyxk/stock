@@ -45,6 +45,8 @@ github.com/lemonyxk/charts v0.0.0-20220604145438-c48faac34543 h1:TLYakvy9aYIALl7
 github.com/lemonyxk/charts v0.0.0-20220604145438-c48faac34543/go.mod h1:tMweakUViw6CeG74FgN7An8AgKWqbaWnutVdLqxccTQ=
 github.com/lemonyxk/charts v0.0.0-20220604161240-8eb0dbe71c43 h1:I8Re9lpiK9BqDbqcCo54oK/OXNMnlN4Xdl4JIDoAud0=
 github.com/lemonyxk/charts v0.0.0-20220604161240-8eb0dbe71c43/go.mod h1:tMweakUViw6CeG74FgN7An8AgKWqbaWnutVdLqxccTQ=
+github.com/lemonyxk/charts v0.0.0-20220607102419-9bf0e97899b3 h1:877ltRVWSywD+WQCCcNMoTRvusFEuwfTf9MkWF2/12s=
+github.com/lemonyxk/charts v0.0.0-20220607102419-9bf0e97899b3/go.mod h1:tMweakUViw6CeG74FgN7An8AgKWqbaWnutVdLqxccTQ=
 github.com/lemonyxk/console v0.0.0-20220524105508-19a1ac7f4c08 h1:7XCtaQsBmdoZsqs02d6WkMK3MtZ929SQ2d1uSKP6BLU=
 github.com/lemonyxk/console v0.0.0-20220524105508-19a1ac7f4c08/go.mod h1:rRgUF2S+jlEc0oZYUHHlskJQa+9O5zNXxav0dGxx8vA=
 github.com/lemonyxk/kitty/v2 v2.0.0-20220526150030-f427b7b1962b h1:BzomPNWASQbjEkBgMMGFNsh0GukcEz70x+LYWJpFfJQ=

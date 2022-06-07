@@ -168,6 +168,7 @@ func backMenu() {
 func exit() {
 	flush()
 	showCursor()
+	_ = keyboard.Close()
 	os.Exit(0)
 }
 
