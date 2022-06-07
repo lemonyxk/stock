@@ -62,7 +62,10 @@ func dayRender(area, code string) {
 		}
 
 		l.RenderXBorder = func(isEmpty bool, x string) string {
-			return "━"
+			if isEmpty {
+				return "━"
+			}
+			return "┻"
 		}
 		// graph := asciigraph.Plot(
 		// 	priceData,
