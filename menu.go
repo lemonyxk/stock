@@ -148,6 +148,8 @@ var isSelectMenu = false
 var isEditMenu = false
 
 func flush() {
+	// write("\033[H\033[J")
+	// write("\x1bc")
 	write("\033[H\033[J")
 }
 

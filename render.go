@@ -50,7 +50,7 @@ func dayRender(area, code string) {
 			time.Now().AddDate(0, 0, -90).Format("2006-01-02"),
 			time.Now().Format("2006-01-02"),
 		}, priceData, 365)
-		l.SetSize(termWidth-1, termHeight-3)
+		l.SetSize(termWidth-1, termHeight-4)
 		l.SetYPrecision(2)
 		l.RenderSymbol = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, symbol string) string {
 			if lastValue <= value {
@@ -121,7 +121,7 @@ func minRender(area, code string) {
 		}
 
 		var l = charts.New([]string{"09:30", "13:00", "15:00"}, priceData, 240)
-		l.SetSize(termWidth-1, termHeight-3)
+		l.SetSize(termWidth-1, termHeight-4)
 		l.SetYPrecision(2)
 		l.RenderSymbol = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, symbol string) string {
 			if lastValue <= value {
