@@ -61,6 +61,10 @@ func dayRender(area, code string) {
 			return symbol
 		}
 
+		l.RenderEmpty = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, empty string) string {
+			return "┃"
+		}
+
 		l.RenderXBorder = func(isEmpty bool, x string) string {
 			if isEmpty {
 				return "━"
@@ -128,16 +132,23 @@ func minRender(area, code string) {
 				return console.FgRed.Sprint(symbol)
 			}
 
-			// return console.FgGreen.Sprint()
+			// return console.FgGreen.Sprint(symbol)
 			return symbol
 		}
 
 		l.RenderEmpty = func(lastValue float64, isLastEmpty bool, value float64, isEmpty bool, empty string) string {
-			return " "
+			return "┃"
 		}
 
+		// l.RenderXBorder = func(isEmpty bool, x string) string {
+		// 	return "━"
+		// }
+
 		l.RenderXBorder = func(isEmpty bool, x string) string {
-			return "━"
+			if isEmpty {
+				return "━"
+			}
+			return "┻"
 		}
 
 		// graph := asciigraph.Plot(
