@@ -25,7 +25,7 @@ func tips() {
 	}
 	var str = fmt.Sprintf("[Mode: %s] [Q: Quit] [B: Back] [M: Min K] [D: Day K]\r\n", sm)
 	var s = strings.Repeat(" ", (termWidth-text.RuneCount(str))/2)
-	write(console.FgYellow.Sprint(s + str))
+	write(console.FgYellow.Sprint(s + str + "\n"))
 }
 
 func menuTips() {
